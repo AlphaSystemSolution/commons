@@ -32,10 +32,6 @@ import static javax.xml.datatype.DatatypeConstants.FIELD_UNDEFINED;
  */
 public class AppUtil {
 
-	public static enum XMLGregorianCalendarDateFormat {
-		NO_TIME_TRUNCATION, TIME_SETTTO_ZERO, TIME_PART_UNDEFINED
-	}
-
 	public static final String NEW_LINE = System.getProperty("line.separator");
 	public static final String TAB = "    ";
 	public static final String SEPARATOR = File.separator;
@@ -45,7 +41,6 @@ public class AppUtil {
 	public static final File USER_TEMP_DIR = new File(getProperty(
 			"java.io.tmpdir", USER_HOME));
 	public static final File USER_HOME_DIR = new File(USER_HOME);
-
 	private static ClassLoader classLoader = null;
 
 	static {
@@ -262,7 +257,7 @@ public class AppUtil {
 
 	/**
 	 * DOCUMENT ME!
-	 * 
+	 *
 	 * @param ste
 	 *            DOCUMENT ME!
 	 * @return DOCUMENT ME!
@@ -338,7 +333,7 @@ public class AppUtil {
 		return genericClasses.toArray(new Class<?>[0]);
 	}
 
-	public static boolean isGivenClass(Class<?> supperClass, Object object) {
+	public static boolean isGivenType(Class<?> supperClass, Object object) {
 		return object != null
 				&& supperClass.isAssignableFrom(object.getClass());
 	}
@@ -438,6 +433,10 @@ public class AppUtil {
 				}
 			}
 		}
+	}
+
+	public enum XMLGregorianCalendarDateFormat {
+		NO_TIME_TRUNCATION, TIME_SETTTO_ZERO, TIME_PART_UNDEFINED
 	}
 
 }
