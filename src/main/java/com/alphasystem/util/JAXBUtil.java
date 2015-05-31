@@ -29,18 +29,16 @@ import java.util.GregorianCalendar;
 
 import static com.alphasystem.util.AppUtil.getResourceAsStream;
 import static com.alphasystem.util.JAXBUtil.XMLGregorianCalendarDateFormat.*;
+import static java.lang.Boolean.TRUE;
 import static javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI;
 import static javax.xml.bind.Marshaller.JAXB_FORMATTED_OUTPUT;
+import static javax.xml.bind.Marshaller.JAXB_FRAGMENT;
 
 /**
  * @author Syed Farhan Ali
  * 
  */
 public class JAXBUtil {
-
-	public enum XMLGregorianCalendarDateFormat {
-		NO_TIME_TRUNCATION, TIME_SETTTO_ZERO, TIME_PART_UNDEFINED
-	}
 
 	public static XMLGregorianCalendar calendarFromDate(Date date) {
 		return calendarFromDate(date, TIME_SETTTO_ZERO);
@@ -198,7 +196,8 @@ public class JAXBUtil {
 			Schema schema = schemaFactory.newSchema(schemas);
 			marshaller.setSchema(schema);
 		}
-		marshaller.setProperty(JAXB_FORMATTED_OUTPUT, true);
+		marshaller.setProperty(JAXB_FORMATTED_OUTPUT, TRUE);
+		marshaller.setProperty(JAXB_FRAGMENT, TRUE);
 		if (useCdata) {
 			XMLOutputFactory xof = XMLOutputFactory.newInstance();
 			XMLStreamWriter xmlStreamWriter = xof.createXMLStreamWriter(writer);
@@ -308,5 +307,9 @@ public class JAXBUtil {
 			}
 		}
 		return result;
+	}
+
+	public enum XMLGregorianCalendarDateFormat {
+		NO_TIME_TRUNCATION, TIME_SETTTO_ZERO, TIME_PART_UNDEFINED
 	}
 }
