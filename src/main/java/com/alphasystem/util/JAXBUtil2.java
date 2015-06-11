@@ -3,15 +3,16 @@
  */
 package com.alphasystem.util;
 
-import static javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI;
-import static javax.xml.bind.Marshaller.JAXB_FORMATTED_OUTPUT;
+import org.xml.sax.SAXException;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.net.MalformedURLException;
+import javax.xml.bind.*;
+import javax.xml.namespace.NamespaceContext;
+import javax.xml.stream.*;
+import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashMap;
@@ -19,21 +20,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.namespace.NamespaceContext;
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
-import javax.xml.transform.Source;
-import javax.xml.transform.stream.StreamSource;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
-
-import org.xml.sax.SAXException;
+import static javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI;
+import static javax.xml.bind.Marshaller.JAXB_FORMATTED_OUTPUT;
 
 /**
  * @author sali
@@ -41,38 +29,12 @@ import org.xml.sax.SAXException;
  */
 public class JAXBUtil2 {
 
-	private class NoNamespaceContext implements NamespaceContext {
-
-		@Override
-		public String getNamespaceURI(String prefix) {
-			return "";
-		}
-
-		@Override
-		public String getPrefix(String namespaceURI) {
-			return "";
-		}
-
-		@SuppressWarnings("rawtypes")
-		@Override
-		public Iterator getPrefixes(String namespaceURI) {
-			return null;
-		}
-
-	}
-
 	private boolean useCdata;
-
 	private boolean omitNamespace;
-
 	private Marshaller.Listener marshallerListener;
-
 	private Unmarshaller.Listener unmarshallerListener;
-
 	private Schema schema;
-
 	private NamespaceContext noNamespaceContext;
-
 	private Map<String, Object> marshallerProperties = new HashMap<String, Object>();
 
 	public JAXBUtil2() {
@@ -118,20 +80,54 @@ public class JAXBUtil2 {
 		return marshallerListener;
 	}
 
+	public void setMarshallerListener(Marshaller.Listener listener) {
+		this.marshallerListener = listener;
+	}
+
 	public Schema getSchema() {
 		return schema;
+	}
+
+	public void setSchema(String... schemaPath) {
+		if (schemaPath != null && schemaPath.length > 0) {
+			SchemaFactory schemaFactory = SchemaFactory
+					.newInstance(W3C_XML_SCHEMA_NS_URI);
+			Source[] schemas = new StreamSource[schemaPath.length];
+			for (int i = 0; i < schemaPath.length; i++) {
+				InputStream stream = AppUtil.getResourceAsStream(schemaPath[i]);
+				schemas[i] = new StreamSource(stream);
+			}
+			try {
+				schema = schemaFactory.newSchema(schemas);
+			} catch (SAXException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	public Unmarshaller.Listener getUnmarshallerListener() {
 		return unmarshallerListener;
 	}
 
+	public void setUnmarshallerListener(
+			Unmarshaller.Listener unmarshallerListener) {
+		this.unmarshallerListener = unmarshallerListener;
+	}
+
 	public boolean isOmitNamespace() {
 		return omitNamespace;
 	}
 
+	public void setOmitNamespace(boolean omitNamespace) {
+		this.omitNamespace = omitNamespace;
+	}
+
 	public boolean isUseCdata() {
 		return useCdata;
+	}
+
+	public void setUseCdata(boolean useCdata) {
+		this.useCdata = useCdata;
 	}
 
 	public <T> String marshall(String contextPath, JAXBElement<T> jaxbElement)
@@ -188,46 +184,12 @@ public class JAXBUtil2 {
 		xmlStreamWriter.close();
 	}
 
-	public void setMarshallerListener(Marshaller.Listener listener) {
-		this.marshallerListener = listener;
-	}
-
 	public void setMarshallerProperty(String key, Object value) {
 		marshallerProperties.put(key, value);
 	}
 
-	public void setOmitNamespace(boolean omitNamespace) {
-		this.omitNamespace = omitNamespace;
-	}
-
-	public void setSchema(String... schemaPath) {
-		if (schemaPath != null && schemaPath.length > 0) {
-			SchemaFactory schemaFactory = SchemaFactory
-					.newInstance(W3C_XML_SCHEMA_NS_URI);
-			Source[] schemas = new StreamSource[schemaPath.length];
-			for (int i = 0; i < schemaPath.length; i++) {
-				InputStream stream = AppUtil.getResourceAsStream(schemaPath[i]);
-				schemas[i] = new StreamSource(stream);
-			}
-			try {
-				schema = schemaFactory.newSchema(schemas);
-			} catch (SAXException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
-	public void setUnmarshallerListener(
-			Unmarshaller.Listener unmarshallerListener) {
-		this.unmarshallerListener = unmarshallerListener;
-	}
-
-	public void setUseCdata(boolean useCdata) {
-		this.useCdata = useCdata;
-	}
-
 	public <T> T unmarshal(Class<T> klass, File sourceFile)
-			throws MalformedURLException, IOException, JAXBException {
+			throws IOException, JAXBException {
 		return unmarshal(klass, sourceFile.toURI().toURL());
 	}
 
@@ -243,6 +205,15 @@ public class JAXBUtil2 {
 		if (schema != null) {
 			unmarshaller.setSchema(schema);
 		}
+		XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
+		try {
+			XMLStreamReader xmlStreamReader = xmlInputFactory.createXMLStreamReader(source);
+			if (omitNamespace) {
+			}
+		} catch (XMLStreamException e) {
+			e.printStackTrace();
+		}
+
 		@SuppressWarnings("unchecked")
 		JAXBElement<T> t = (JAXBElement<T>) unmarshaller.unmarshal(source);
 		result = t.getValue();
@@ -268,6 +239,26 @@ public class JAXBUtil2 {
 			}
 		}
 		return result;
+	}
+
+	private class NoNamespaceContext implements NamespaceContext {
+
+		@Override
+		public String getNamespaceURI(String prefix) {
+			return "";
+		}
+
+		@Override
+		public String getPrefix(String namespaceURI) {
+			return "";
+		}
+
+		@SuppressWarnings("rawtypes")
+		@Override
+		public Iterator getPrefixes(String namespaceURI) {
+			return null;
+		}
+
 	}
 
 }
