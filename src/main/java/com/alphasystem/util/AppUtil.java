@@ -16,6 +16,9 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -25,6 +28,7 @@ import static com.alphasystem.util.AppUtil.XMLGregorianCalendarDateFormat.*;
 import static com.alphasystem.util.IdGenerator.nextId;
 import static java.lang.String.format;
 import static java.lang.System.getProperty;
+import static java.nio.file.Files.createTempDirectory;
 import static javax.xml.datatype.DatatypeConstants.FIELD_UNDEFINED;
 
 /**
@@ -110,19 +114,25 @@ public class AppUtil {
 	public static File createTempFile(String suffix, boolean createSubFolder)
 			throws BusinessException {
 		String tempFileName = nextId() + "-";
-		File parentDirectory = USER_TEMP_DIR;
+		Path parentPath = Paths.get(USER_TEMP_DIR.toURI());
 		if (createSubFolder) {
-			parentDirectory = new File(parentDirectory, nextId());
+			String subFolderPrefix = nextId();
+			try {
+				parentPath = createTempDirectory(parentPath, subFolderPrefix);
+			} catch (IOException e) {
+				throw new BusinessException("TEMP_FILE_NOT_CREATED",
+						format("Unable to create temp directory {%s} under {%s}", subFolderPrefix, parentPath));
+			}
 		}
-		File tempFile = null;
+		Path tempFile = null;
 		try {
-			tempFile = File.createTempFile(tempFileName, suffix,
-					parentDirectory);
+			tempFile = Files.createTempFile(parentPath, tempFileName, suffix);
 		} catch (IOException e) {
-			throw new BusinessException("TEMP_FILE_NOT_CREATED", format(
-					"Unable to create temp file %s.xml", tempFileName), e);
+			throw new BusinessException("TEMP_FILE_NOT_CREATED",
+					format("Unable to create temp file {%s}, under {%s}", tempFileName, parentPath));
 		}
-		return tempFile;
+
+		return tempFile == null ? null : tempFile.toFile();
 	}
 
 	public static Date dateFromCalendar(XMLGregorianCalendar xmlCal) {
