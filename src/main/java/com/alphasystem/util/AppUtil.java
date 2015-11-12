@@ -230,21 +230,29 @@ public class AppUtil {
 	}
 
 	public static InputStream getResourceAsStream(String path) {
-		path = path.replace('.', '/');
-		int lastIndex = path.lastIndexOf('/');
-		path = path.substring(0, lastIndex) + "."
-				+ path.substring(lastIndex + 1, path.length());
-		return classLoader.getResourceAsStream(path);
+		return classLoader.getResourceAsStream(convertPath(path));
 	}
 
-	public static Enumeration<URL> getResources(String path) {
+    private static String convertPath(String path) {
+        path = path.replace('.', '/');
+        int lastIndex = path.lastIndexOf('/');
+        path = path.substring(0, lastIndex) + "."
+                + path.substring(lastIndex + 1, path.length());
+        return path;
+    }
+
+    public static Enumeration<URL> getResources(String path) {
 		try {
-			return classLoader.getResources(path);
+			return classLoader.getResources(convertPath(path));
 		} catch (IOException e) {
 			// logger.error(e.getMessage(), e);
 		}
 		return null;
 	}
+
+	public static URL getResource(String path){
+        return classLoader.getResource(convertPath(path));
+    }
 
 	public static String getStackTrace(Throwable exception) {
 		StringBuffer stackTrace = new StringBuffer();
