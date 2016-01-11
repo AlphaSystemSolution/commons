@@ -14,8 +14,11 @@ import java.beans.XMLEncoder;
 import java.io.*;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -28,7 +31,9 @@ import static com.alphasystem.util.AppUtil.XMLGregorianCalendarDateFormat.*;
 import static com.alphasystem.util.IdGenerator.nextId;
 import static java.lang.String.format;
 import static java.lang.System.getProperty;
+import static java.nio.file.FileSystems.newFileSystem;
 import static java.nio.file.Files.createTempDirectory;
+import static java.nio.file.Paths.get;
 import static javax.xml.datatype.DatatypeConstants.FIELD_UNDEFINED;
 
 /**
@@ -452,6 +457,35 @@ public class AppUtil {
 			}
 		}
 	}
+
+    public static List<String> readAllLines(String resourceName) throws IOException, URISyntaxException {
+        FileSystem fs = null;
+        List<String> lines = null;
+        try {
+            URL url = getResource(resourceName);
+            URI uri = url.toURI();
+            Path path;
+            String[] split = uri.toString().split("!");
+            if (split != null && split.length > 1) {
+                fs = newFileSystem(URI.create(split[0]), new HashMap());
+                path = fs.getPath(split[1]);
+            } else {
+                path = get(uri);
+            }
+            lines = Files.readAllLines(path);
+        } catch (IOException | URISyntaxException e) {
+            throw e;
+        } finally {
+            if (fs != null) {
+                try {
+                    fs.close();
+                } catch (IOException e) {
+                }
+            }
+        }
+
+        return lines;
+    }
 
 	public enum XMLGregorianCalendarDateFormat {
 		NO_TIME_TRUNCATION, TIME_SETTTO_ZERO, TIME_PART_UNDEFINED
