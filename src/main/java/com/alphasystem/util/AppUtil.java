@@ -498,6 +498,12 @@ public class AppUtil {
     }
 
     public static void copyResources(File destDir, String resourceDir, String resourceName) {
+        if (destDir == null) {
+            return;
+        }
+        if (!destDir.exists()) {
+            destDir.mkdirs();
+        }
         try {
             Path path = get(destDir.getAbsolutePath(), resourceName);
             List<String> lines = readAllLines(format("%s.%s", resourceDir, resourceName));
