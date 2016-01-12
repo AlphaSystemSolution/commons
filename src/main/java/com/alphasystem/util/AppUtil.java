@@ -486,6 +486,16 @@ public class AppUtil {
         return lines;
     }
 
+    public static String readAllLinesAsString(String resourceName) throws IOException, URISyntaxException {
+        List<String> lines = readAllLines(resourceName);
+        StringBuilder builder = new StringBuilder();
+        builder.append(lines.get(0));
+        for (int i = 1; i < lines.size(); i++) {
+            builder.append(NEW_LINE).append(lines.get(i));
+        }
+        return builder.toString();
+    }
+
     public static String findCommonPath(String... paths) {
         String commonPath = "";
         String[][] folders = new String[paths.length][];
