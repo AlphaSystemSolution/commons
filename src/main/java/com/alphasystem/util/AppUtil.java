@@ -33,6 +33,7 @@ import static java.lang.String.format;
 import static java.lang.System.getProperty;
 import static java.nio.file.FileSystems.newFileSystem;
 import static java.nio.file.Files.createTempDirectory;
+import static java.nio.file.Files.write;
 import static java.nio.file.Paths.get;
 import static javax.xml.datatype.DatatypeConstants.FIELD_UNDEFINED;
 
@@ -494,6 +495,16 @@ public class AppUtil {
             builder.append(NEW_LINE).append(lines.get(i));
         }
         return builder.toString();
+    }
+
+    public static void copyResources(File destDir, String resourceDir, String resourceName) {
+        try {
+            Path path = get(destDir.getAbsolutePath(), resourceName);
+            List<String> lines = readAllLines(format("%s.%s", resourceDir, resourceName));
+            write(path, lines);
+        } catch (IOException | URISyntaxException e) {
+            e.printStackTrace();
+        }
     }
 
     public static String findCommonPath(String... paths) {
