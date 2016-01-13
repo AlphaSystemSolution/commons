@@ -18,6 +18,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.ByteBuffer;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.WritableByteChannel;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -31,6 +34,7 @@ import static com.alphasystem.util.AppUtil.XMLGregorianCalendarDateFormat.*;
 import static com.alphasystem.util.IdGenerator.nextId;
 import static java.lang.String.format;
 import static java.lang.System.getProperty;
+import static java.nio.channels.Channels.newChannel;
 import static java.nio.file.FileSystems.newFileSystem;
 import static java.nio.file.Files.createTempDirectory;
 import static java.nio.file.Files.write;
@@ -48,8 +52,7 @@ public class AppUtil {
     public static final String USER_DIR = getProperty("user.dir", ".");
     public static final File CURRENT_USER_DIR = new File(USER_DIR);
     public static final String USER_HOME = getProperty("user.home", USER_DIR);
-    public static final File USER_TEMP_DIR = new File(getProperty(
-            "java.io.tmpdir", USER_HOME));
+    public static final File USER_TEMP_DIR = new File(getProperty("java.io.tmpdir", USER_HOME));
     public static final File USER_HOME_DIR = new File(USER_HOME);
     private static ClassLoader classLoader = null;
 
@@ -130,7 +133,7 @@ public class AppUtil {
                         format("Unable to create temp directory {%s} under {%s}", subFolderPrefix, parentPath));
             }
         }
-        Path tempFile = null;
+        Path tempFile;
         try {
             tempFile = Files.createTempFile(parentPath, tempFileName, suffix);
         } catch (IOException e) {
@@ -237,6 +240,59 @@ public class AppUtil {
 
     public static InputStream getResourceAsStream(String path) {
         return classLoader.getResourceAsStream(convertPath(path));
+    }
+
+    public static File extractResourceFromJar(String resourceName) throws ApplicationException {
+        // find the extension of the resource
+        String extension = ".tmp";
+        int i = resourceName.lastIndexOf(".");
+        if (i > -1) {
+            extension = resourceName.substring(i);
+        }
+        File destFile = createTempFile(extension);
+        return extractResourceFromJar(resourceName, destFile);
+    }
+
+    public static File extractResourceFromJar(String resourceName, File destFile) throws SystemException {
+        InputStream inputStream = getResourceAsStream(resourceName);
+        BufferedOutputStream outputStream = null;
+        try {
+            outputStream = new BufferedOutputStream(new FileOutputStream(destFile));
+            fastCopy(inputStream, outputStream);
+        } catch (IOException e) {
+            throw new SystemException(e.getMessage(), e);
+        } finally {
+            if (outputStream != null) {
+                try {
+                    outputStream.close();
+                } catch (IOException e) {
+                    // ignore
+                }
+            }
+        }
+        return destFile;
+    }
+
+    public static void fastCopy(final InputStream src, final OutputStream dest) throws IOException {
+        final ReadableByteChannel inputChannel = newChannel(src);
+        final WritableByteChannel outputChannel = newChannel(dest);
+        fastCopy(inputChannel, outputChannel);
+    }
+
+    public static void fastCopy(final ReadableByteChannel src, final WritableByteChannel dest) throws IOException {
+        final ByteBuffer buffer = ByteBuffer.allocateDirect(16 * 1024);
+
+        while (src.read(buffer) != -1) {
+            buffer.flip();
+            dest.write(buffer);
+            buffer.compact();
+        }
+
+        buffer.flip();
+
+        while (buffer.hasRemaining()) {
+            dest.write(buffer);
+        }
     }
 
     private static String convertPath(String path) {
@@ -485,6 +541,33 @@ public class AppUtil {
         }
 
         return lines;
+    }
+
+    public static Path getPath(String resourceName) throws IOException, URISyntaxException {
+        FileSystem fs = null;
+        Path path;
+        try {
+            URL url = getResource(resourceName);
+            URI uri = url.toURI();
+            String[] split = uri.toString().split("!");
+            if (split != null && split.length > 1) {
+                fs = newFileSystem(URI.create(split[0]), new HashMap());
+                path = fs.getPath(split[1]);
+            } else {
+                path = get(uri);
+            }
+        } catch (IOException | URISyntaxException e) {
+            throw e;
+        } finally {
+            if (fs != null) {
+                try {
+                    fs.close();
+                } catch (IOException e) {
+                }
+            }
+        }
+
+        return path;
     }
 
     public static String readAllLinesAsString(String resourceName) throws IOException, URISyntaxException {
