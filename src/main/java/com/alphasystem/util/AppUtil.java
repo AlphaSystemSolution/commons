@@ -18,13 +18,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.nio.ByteBuffer;
-import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.WritableByteChannel;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -34,7 +30,6 @@ import static com.alphasystem.util.AppUtil.XMLGregorianCalendarDateFormat.*;
 import static com.alphasystem.util.IdGenerator.nextId;
 import static java.lang.String.format;
 import static java.lang.System.getProperty;
-import static java.nio.channels.Channels.newChannel;
 import static java.nio.file.FileSystems.newFileSystem;
 import static java.nio.file.Files.createTempDirectory;
 import static java.nio.file.Files.write;
@@ -123,7 +118,7 @@ public class AppUtil {
     public static File createTempFile(String suffix, boolean createSubFolder)
             throws BusinessException {
         String tempFileName = nextId() + "-";
-        Path parentPath = Paths.get(USER_TEMP_DIR.toURI());
+        Path parentPath = get(USER_TEMP_DIR.toURI());
         if (createSubFolder) {
             String subFolderPrefix = nextId();
             try {
@@ -240,59 +235,6 @@ public class AppUtil {
 
     public static InputStream getResourceAsStream(String path) {
         return classLoader.getResourceAsStream(convertPath(path));
-    }
-
-    public static File extractResourceFromJar(String resourceName) throws ApplicationException {
-        // find the extension of the resource
-        String extension = ".tmp";
-        int i = resourceName.lastIndexOf(".");
-        if (i > -1) {
-            extension = resourceName.substring(i);
-        }
-        File destFile = createTempFile(extension);
-        return extractResourceFromJar(resourceName, destFile);
-    }
-
-    public static File extractResourceFromJar(String resourceName, File destFile) throws SystemException {
-        InputStream inputStream = getResourceAsStream(resourceName);
-        BufferedOutputStream outputStream = null;
-        try {
-            outputStream = new BufferedOutputStream(new FileOutputStream(destFile));
-            fastCopy(inputStream, outputStream);
-        } catch (IOException e) {
-            throw new SystemException(e.getMessage(), e);
-        } finally {
-            if (outputStream != null) {
-                try {
-                    outputStream.close();
-                } catch (IOException e) {
-                    // ignore
-                }
-            }
-        }
-        return destFile;
-    }
-
-    public static void fastCopy(final InputStream src, final OutputStream dest) throws IOException {
-        final ReadableByteChannel inputChannel = newChannel(src);
-        final WritableByteChannel outputChannel = newChannel(dest);
-        fastCopy(inputChannel, outputChannel);
-    }
-
-    public static void fastCopy(final ReadableByteChannel src, final WritableByteChannel dest) throws IOException {
-        final ByteBuffer buffer = ByteBuffer.allocateDirect(16 * 1024);
-
-        while (src.read(buffer) != -1) {
-            buffer.flip();
-            dest.write(buffer);
-            buffer.compact();
-        }
-
-        buffer.flip();
-
-        while (buffer.hasRemaining()) {
-            dest.write(buffer);
-        }
     }
 
     private static String convertPath(String path) {
@@ -412,7 +354,13 @@ public class AppUtil {
         return genericClasses.toArray(new Class<?>[0]);
     }
 
+    @Deprecated
     public static boolean isGivenType(Class<?> supperClass, Object object) {
+        return object != null
+                && supperClass.isAssignableFrom(object.getClass());
+    }
+
+    public static boolean isInstanceOf(Class<?> supperClass, Object object) {
         return object != null
                 && supperClass.isAssignableFrom(object.getClass());
     }
@@ -515,10 +463,14 @@ public class AppUtil {
     }
 
     public static List<String> readAllLines(String resourceName) throws IOException, URISyntaxException {
+        return readAllLines(getResource(resourceName));
+    }
+
+    public static List<String> readAllLines(URL url) throws IOException, URISyntaxException {
         FileSystem fs = null;
         List<String> lines = null;
+
         try {
-            URL url = getResource(resourceName);
             URI uri = url.toURI();
             Path path;
             String[] split = uri.toString().split("!");
@@ -596,6 +548,19 @@ public class AppUtil {
         }
     }
 
+    public static void copyResource(File destDir, String pathName, String resourceName)
+            throws IOException, URISyntaxException {
+        if (destDir == null) {
+            return;
+        }
+        if (!destDir.exists()) {
+            destDir.mkdirs();
+        }
+        Path destPath = get(destDir.getAbsolutePath(), pathName);
+        List<String> lines = readAllLines(resourceName);
+        write(destPath, lines);
+    }
+
     public static String findCommonPath(String... paths) {
         String commonPath = "";
         String[][] folders = new String[paths.length][];
@@ -622,8 +587,14 @@ public class AppUtil {
         return commonPath;
     }
 
-    public static String findRelativePath(String base, String path) {
-        return new File(base).toURI().relativize(new File(path).toURI()).getPath();
+    public static Path toRelativePath(String base, String path) {
+        return toRelativePath(new File(base), new File(path));
+    }
+
+    public static Path toRelativePath(File baseDir, File path) {
+        Path p1 = get(baseDir.toURI());
+        Path p2 = get(path.toURI());
+        return p1.relativize(p2);
     }
 
     public enum XMLGregorianCalendarDateFormat {
