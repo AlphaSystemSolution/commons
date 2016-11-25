@@ -25,7 +25,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.alphasystem.util.AppUtil.XMLGregorianCalendarDateFormat.*;
 import static com.alphasystem.util.IdGenerator.nextId;
@@ -475,8 +474,8 @@ public class AppUtil {
             URI uri = url.toURI();
             Path path;
             String[] split = uri.toString().split("!");
-            if (split != null && split.length > 1) {
-                fs = newFileSystem(URI.create(split[0]), new HashMap());
+            if (split.length > 1) {
+                fs = newFileSystem(URI.create(split[0]), new HashMap<>());
                 path = fs.getPath(split[1]);
             } else {
                 path = get(uri);
@@ -489,6 +488,7 @@ public class AppUtil {
                 try {
                     fs.close();
                 } catch (IOException e) {
+                    //
                 }
             }
         }
@@ -523,16 +523,18 @@ public class AppUtil {
         return path;
     }
 
-    public static String readResource(String resourcePath) {
-        String content;
-        try {
-            try (BufferedReader buffer = new BufferedReader(new InputStreamReader(getResourceAsStream(resourcePath)))) {
-                content = buffer.lines().collect(Collectors.joining(NEW_LINE));
-            }
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
+    public static String readResource(String resourcePath) throws IOException, URISyntaxException {
+        StringBuilder content = new StringBuilder();
+        final List<String> lines = readAllLines(resourcePath);
+        if (lines == null || lines.isEmpty()) {
+            return null;
         }
-        return content;
+        content.append(lines.get(0));
+        for (int i = 1; i < lines.size(); i++) {
+            content.append(NEW_LINE).append(lines.get(i));
+        }
+        content.append(NEW_LINE);
+        return content.toString();
     }
 
     public static void copyResources(File destDir, String resourceDir, String resourceName) {
