@@ -561,8 +561,8 @@ public class AppUtil {
         if (!destDir.exists()) {
             destDir.mkdirs();
         }
-        Path destPath = get(destDir.getAbsolutePath(), pathName);
-        List<String> lines = readAllLines(resourceName);
+        Path destPath = get(destDir.getAbsolutePath(), resourceName);
+        List<String> lines = readAllLines(format("%s.%s", pathName, resourceName));
         write(destPath, lines);
     }
 
