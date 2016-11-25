@@ -523,7 +523,7 @@ public class AppUtil {
         return path;
     }
 
-    public static String readResource(String resourcePath) throws IOException, URISyntaxException {
+    public static String readResource(String resourcePath) {
         String content;
         try {
             try (BufferedReader buffer = new BufferedReader(new InputStreamReader(getResourceAsStream(resourcePath)))) {
