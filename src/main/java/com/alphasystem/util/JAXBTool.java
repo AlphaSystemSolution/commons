@@ -182,6 +182,24 @@ public final class JAXBTool {
         return result;
     }
 
+    public <T> T unmarshal(Class<T> klass, Reader source)
+            throws JAXBException {
+        T result = null;
+        JAXBContext jaxbContext = JAXBContext.newInstance(klass.getPackage()
+                .getName());
+        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+        if (unMarshallerListener != null) {
+            unmarshaller.setListener(unMarshallerListener);
+        }
+        if (schema != null) {
+            unmarshaller.setSchema(schema);
+        }
+        @SuppressWarnings("unchecked")
+        JAXBElement<T> t = (JAXBElement<T>) unmarshaller.unmarshal(source);
+        result = t.getValue();
+        return result;
+    }
+
     public <T> T unmarshal(Class<T> klass, URL sourceURL) throws IOException,
             JAXBException {
         InputStream source = null;
