@@ -52,8 +52,12 @@ public abstract class GenericPreferences {
         return instance;
     }
 
-    @SuppressWarnings({"unchecked"})
     public static <P extends GenericPreferences> P getInstance(Class<P> _class) {
+        return getInstance(_class, false);
+    }
+
+    @SuppressWarnings({"unchecked"})
+    private static <P extends GenericPreferences> P getInstance(Class<P> _class, boolean recursive) {
         final String _className = _class.getName();
         P instance = (P) instances.get(_className);
         if (instance == null) {
@@ -61,14 +65,22 @@ public abstract class GenericPreferences {
                     .load(GenericPreferences.class);
 
             for (GenericPreferences pref : serviceLoader) {
-                if (_className.equals(pref.getClass().getName())) {
+                boolean prefType = _className.equals(pref.getClass().getName());
+                if (!prefType && recursive) {
+                    prefType = AppUtil.isInstanceOf(_class, pref);
+                }
+                if (prefType) {
                     instance = (P) pref;
                     instances.put(_className, instance);
                     break;
                 }
             }
         }
+
         if (instance == null) {
+            if (!recursive) {
+                return getInstance(_class, true);
+            }
             throw new RuntimeException(String.format("Unable to find instance for Class \"%s\".", _className));
         }
         return instance;
