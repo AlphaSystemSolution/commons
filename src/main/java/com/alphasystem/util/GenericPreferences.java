@@ -114,6 +114,9 @@ public abstract class GenericPreferences {
         return node.get(key, def);
     }
 
+    public Preferences getNode(String prefix, String nodeName){
+        return getNode(String.format("%s_%s", prefix, nodeName));
+    }
     /**
      * DOCUMENT ME!
      *
