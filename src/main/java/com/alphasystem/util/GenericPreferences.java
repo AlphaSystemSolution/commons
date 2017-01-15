@@ -35,7 +35,7 @@ public abstract class GenericPreferences {
     /**
      * @return the instance
      */
-    public static synchronized GenericPreferences getInstance() {
+    public static GenericPreferences getInstance() {
         if (instance == null) {
             ServiceLoader<GenericPreferences> serviceLoader = ServiceLoader
                     .load(GenericPreferences.class);
@@ -46,7 +46,7 @@ public abstract class GenericPreferences {
                 }
             }
             if (instance == null) {
-                System.err.println("Still null");
+                throw new RuntimeException("Unable to find any implementation");
             }
         }
         return instance;
