@@ -14,4 +14,6 @@ hs_err_pid*
 #Maven
 target/
 build/
+.idea/
+.gradle/
 *.iml
