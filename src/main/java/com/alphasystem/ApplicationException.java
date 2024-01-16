@@ -37,7 +37,7 @@ public abstract class ApplicationException extends Exception {
 			T errorCode = cons.newInstance(code, description);
 			errorCodes.add(errorCode);
 		} catch (Exception e) {
-			e.printStackTrace();
+			//
 		}
 	}
 
