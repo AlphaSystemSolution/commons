@@ -1,4 +1,4 @@
-package com.alphasystem.util;
+package com.alphasystem.commons.util;
 
 import com.alphasystem.commons.BusinessException;
 

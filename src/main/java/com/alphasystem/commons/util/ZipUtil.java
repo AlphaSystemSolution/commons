@@ -1,4 +1,4 @@
-package com.alphasystem.util;
+package com.alphasystem.commons.util;
 
 import com.alphasystem.commons.ApplicationException;
 import com.alphasystem.commons.BusinessException;
@@ -10,7 +10,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
-import static com.alphasystem.util.FileUtil.copyOutputStream;
+import static com.alphasystem.commons.util.FileUtil.copyOutputStream;
 import static java.lang.String.format;
 import static org.apache.commons.io.IOUtils.copyLarge;
 

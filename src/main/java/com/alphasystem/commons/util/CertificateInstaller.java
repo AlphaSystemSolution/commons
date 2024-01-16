@@ -1,9 +1,9 @@
 /**
  * 
  */
-package com.alphasystem.util;
+package com.alphasystem.commons.util;
 
-import static com.alphasystem.util.AppUtil.USER_HOME_DIR;
+import static com.alphasystem.commons.util.AppUtil.USER_HOME_DIR;
 import static java.lang.String.format;
 import static java.lang.System.setProperty;
 

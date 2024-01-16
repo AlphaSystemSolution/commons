@@ -1,4 +1,4 @@
-package com.alphasystem.util;
+package com.alphasystem.commons.util;
 
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;

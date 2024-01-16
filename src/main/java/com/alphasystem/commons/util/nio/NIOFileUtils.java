@@ -1,4 +1,4 @@
-package com.alphasystem.util.nio;
+package com.alphasystem.commons.util.nio;
 
 import java.io.IOException;
 import java.io.InputStream;

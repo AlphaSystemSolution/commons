@@ -1,10 +1,10 @@
-package com.alphasystem.util;
+package com.alphasystem.commons.util;
 
 /**
  * 
  */
-import static com.alphasystem.util.Base64.decode;
-import static com.alphasystem.util.Base64.encode;
+import static com.alphasystem.commons.util.Base64.decode;
+import static com.alphasystem.commons.util.Base64.encode;
 import static java.lang.System.out;
 import static javax.crypto.Cipher.DECRYPT_MODE;
 import static javax.crypto.Cipher.ENCRYPT_MODE;

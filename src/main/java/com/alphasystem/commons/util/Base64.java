@@ -56,7 +56,7 @@ ll rights
  * <http://www.apache.org/>.
  */
 
-package com.alphasystem.util;
+package com.alphasystem.commons.util;
 
 /**
  * This class provides encode/decode for RFC 2045 Base64 as defined by RFC 2045,

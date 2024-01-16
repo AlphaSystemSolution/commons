@@ -1,7 +1,7 @@
 /**
  *
  */
-package com.alphasystem.util;
+package com.alphasystem.commons.util;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
