@@ -1,4 +1,4 @@
-package com.alphasystem;
+package com.alphasystem.commons;
 
 /**
  * BusinessException wraps all the exception thrown.

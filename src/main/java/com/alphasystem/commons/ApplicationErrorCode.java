@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.alphasystem;
+package com.alphasystem.commons;
 
 import java.io.Serializable;
 import java.util.Objects;

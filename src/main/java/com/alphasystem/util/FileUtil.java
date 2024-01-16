@@ -17,8 +17,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 
-import com.alphasystem.ApplicationException;
-import com.alphasystem.SystemException;
+import com.alphasystem.commons.ApplicationException;
+import com.alphasystem.commons.SystemException;
 
 /**
  * @author sali

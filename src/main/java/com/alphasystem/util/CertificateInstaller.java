@@ -27,8 +27,8 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
-import com.alphasystem.ApplicationException;
-import com.alphasystem.SystemException;
+import com.alphasystem.commons.ApplicationException;
+import com.alphasystem.commons.SystemException;
 
 /**
  * @author sali

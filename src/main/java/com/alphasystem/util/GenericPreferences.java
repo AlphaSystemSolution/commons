@@ -1,6 +1,6 @@
 package com.alphasystem.util;
 
-import com.alphasystem.BusinessException;
+import com.alphasystem.commons.BusinessException;
 
 import java.util.Collections;
 import java.util.HashMap;

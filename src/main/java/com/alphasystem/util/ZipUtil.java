@@ -1,8 +1,8 @@
 package com.alphasystem.util;
 
-import com.alphasystem.ApplicationException;
-import com.alphasystem.BusinessException;
-import com.alphasystem.SystemException;
+import com.alphasystem.commons.ApplicationException;
+import com.alphasystem.commons.BusinessException;
+import com.alphasystem.commons.SystemException;
 
 import java.io.*;
 import java.util.*;

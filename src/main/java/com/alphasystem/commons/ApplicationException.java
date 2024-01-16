@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.alphasystem;
+package com.alphasystem.commons;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
