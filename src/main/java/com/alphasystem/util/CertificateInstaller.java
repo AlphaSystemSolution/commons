@@ -3,7 +3,7 @@
  */
 package com.alphasystem.util;
 
-import static com.alphasystem.util.Utils.USER_HOME_DIR;
+import static com.alphasystem.util.AppUtil.USER_HOME_DIR;
 import static java.lang.String.format;
 import static java.lang.System.setProperty;
 
@@ -150,7 +150,7 @@ public class CertificateInstaller {
 
 		if (!isTrusted(ks, tm, host, port)) {
 			X509Certificate[] chain = tm.chain;
-			if (chain == null || chain.length < 0) {
+			if (chain == null) {
 				System.out.println("Could not obtain server certificate chain");
 				return;
 			}

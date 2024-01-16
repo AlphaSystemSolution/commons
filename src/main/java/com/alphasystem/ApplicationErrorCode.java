@@ -3,10 +3,10 @@
  */
 package com.alphasystem;
 
-import static com.alphasystem.util.HashCodeUtil.hash;
-import static java.lang.String.format;
-
 import java.io.Serializable;
+import java.util.Objects;
+
+import static java.lang.String.format;
 
 /**
  * @author sali
@@ -54,7 +54,7 @@ public abstract class ApplicationErrorCode implements Serializable,
 
 	@Override
 	public int hashCode() {
-		return hash(code);
+		return Objects.hash(code);
 	}
 
 	public void setCode(String code) {

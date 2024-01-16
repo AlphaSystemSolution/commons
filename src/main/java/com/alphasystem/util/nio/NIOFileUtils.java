@@ -10,10 +10,10 @@ import java.nio.channels.WritableByteChannel;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.EnumSet;
+import java.util.Objects;
 
 import static java.lang.Integer.MAX_VALUE;
 import static java.lang.String.format;
-import static java.lang.System.getProperty;
 import static java.nio.channels.Channels.newChannel;
 import static java.nio.file.FileSystems.newFileSystem;
 import static java.nio.file.FileVisitOption.FOLLOW_LINKS;
@@ -27,12 +27,7 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
  */
 public final class NIOFileUtils {
 
-    public static final String USER_DIR = getProperty("user.dir", ".");
-    public static final Path CURRENT_USER_DIR = get(USER_DIR);
-    public static final String USER_HOME = getProperty("user.home", USER_DIR);
-    public static final Path USER_HOME_DIR = get(USER_HOME);
-    public static final Path USER_TEMP_DIR = get(getProperty("java.io.tmpdir", USER_HOME));
-    private static ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+    private static final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
 
     /**
      * Do not let anyone instantiate this class
@@ -141,15 +136,13 @@ public final class NIOFileUtils {
     private static class ZipDirVisitor extends SimpleFileVisitor<Path> {
 
         private final Path fromPath;
-        private final Path toPath;
         private final StandardCopyOption copyOption;
         private Path currentDir;
 
         public ZipDirVisitor(Path fromPath, Path toPath, StandardCopyOption copyOption) {
             this.fromPath = fromPath;
-            this.toPath = toPath;
             this.copyOption = copyOption;
-            this.currentDir = this.toPath;
+            this.currentDir = toPath;
         }
 
         public ZipDirVisitor(Path fromPath, Path toPath) {
@@ -159,7 +152,7 @@ public final class NIOFileUtils {
         @Override
         public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
             final Path relativePath = fromPath.relativize(dir);
-            if (relativePath != null && !relativePath.toString().isEmpty()) {
+            if (!relativePath.toString().isEmpty()) {
                 currentDir = get(currentDir.toString(), dir.getFileName().toString());
                 if (!exists(currentDir)) {
                     createDirectory(currentDir);
@@ -174,7 +167,7 @@ public final class NIOFileUtils {
             final String name = file.toString().substring(1);
             try (InputStream inputStream = contextClassLoader.getResourceAsStream(name)) {
                 final Path target = get(currentDir.toString(), file.getFileName().toString());
-                copy(inputStream, target, copyOption);
+                if (Objects.nonNull(inputStream)) copy(inputStream, target, copyOption);
             }
             return CONTINUE;
         }
