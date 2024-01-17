@@ -60,9 +60,13 @@ repositories {
 }
 
 dependencies {
-    api 'commons-io:commons-io:2.15.1'
-    api 'org.bouncycastle:bcprov-jdk18on:1.77'
-    api 'org.apache.commons:commons-lang3:3.14.0'
+    api "commons-io:commons-io:${commonsIOVersion}"
+    implementation 'org.bouncycastle:bcprov-jdk18on:1.77'
+    api "org.apache.commons:commons-lang3:${commonsLangVersion}"
+    implementation "org.slf4j:slf4j-api:${slf4jApiVersion}"
+    implementation "ch.qos.logback:logback-classic:${logbackClassicVersion}"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
 }
 
 group = 'com.alphasystem'
@@ -80,4 +84,8 @@ publishing {
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
+}
+
+test {
+    useJUnitPlatform {}
 }
