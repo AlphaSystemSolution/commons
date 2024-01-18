@@ -6,6 +6,7 @@ plugins {
     id 'java-library'
     id 'maven-publish'
     id("com.diffplug.spotless") version "6.24.0"
+    id("net.researchgate.release") version "3.0.2"
     id('org.sonatype.gradle.plugins.scan') version '2.6.2'
 }
 
