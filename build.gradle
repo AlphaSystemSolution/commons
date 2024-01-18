@@ -72,20 +72,16 @@ dependencies {
 }
 
 group = 'com.alphasystem'
-version = '0.1.0-SNAPSHOT'
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
 
-publishing {
-    publications {
-        maven(MavenPublication) {
-            from(components.java)
-        }
-    }
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
 }
 
-tasks.withType(JavaCompile) {
-    options.encoding = 'UTF-8'
+java {
+    //withJavadocJar()
+    withSourcesJar()
 }
 
 test {
@@ -98,3 +94,43 @@ nexusIQScan {
     serverUrl = System.getProperty("host")
     applicationId = 'alphasystem-commons'
 }
+
+publishing {
+    repositories {
+        maven {
+            name = "ossrh"
+            url = uri("https://s01.oss.sonatype.org/service/local")
+            credentials(org.gradle.api.credentials.PasswordCredentials)
+        }
+    }
+    publications {
+        maven(MavenPublication) {
+            from(components.java)
+            pom {
+                name = "AlphaSystemCommons"
+                description = "Alpha system commons library"
+                url = "https://github.com/AlphaSystemSolution/commons"
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'sfali23'
+                        name = 'Farhan Syed Ali'
+                        email = 'f.syed.ali@gmail.com'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git://AlphaSystemSolution/commons.git'
+                    developerConnection = 'scm:git@github.com:AlphaSystemSolution/commons.git'
+                    url = 'https://github.com/AlphaSystemSolution/commons'
+                }
+            }
+        }
+    }
+}
+
+afterReleaseBuild.dependsOn publish
