@@ -99,7 +99,7 @@ publishing {
     repositories {
         maven {
             name = "ossrh"
-            url = uri("https://s01.oss.sonatype.org/")
+            url = uri("https://s01.oss.sonatype.org/service/local")
             credentials(org.gradle.api.credentials.PasswordCredentials)
         }
     }
