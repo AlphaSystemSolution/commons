@@ -3,8 +3,11 @@
  */
 
 plugins {
-    id 'java'
+    id 'java-library'
     id 'maven-publish'
+    id("com.diffplug.spotless") version "6.24.0"
+    id("net.researchgate.release") version "3.0.2"
+    id('org.sonatype.gradle.plugins.scan') version '2.6.2'
 }
 
 repositories {
@@ -59,16 +62,19 @@ repositories {
 }
 
 dependencies {
-    compile 'org.apache.commons:commons-configuration2:2.7'
-    compile 'commons-beanutils:commons-beanutils:1.9.2'
-    compile 'commons-io:commons-io:2.4'
-    compile 'org.bouncycastle:bcprov-jdk16:1.46'
-    compile 'org.apache.commons:commons-lang3:3.4'
+    api "commons-io:commons-io:${commonsIOVersion}"
+    implementation 'org.bouncycastle:bcprov-jdk18on:1.77'
+    api "org.apache.commons:commons-lang3:${commonsLangVersion}"
+    implementation "org.slf4j:slf4j-api:${slf4jApiVersion}"
+    implementation "ch.qos.logback:logback-classic:${logbackClassicVersion}"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
 }
 
 group = 'com.alphasystem'
-version = '3.0.0-SNAPSHOT'
-sourceCompatibility = '1.8'
+version = '0.1.0-SNAPSHOT'
+sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_17
 
 publishing {
     publications {
@@ -80,4 +86,15 @@ publishing {
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
+}
+
+test {
+    useJUnitPlatform {}
+}
+
+nexusIQScan {
+    username = System.getProperty("username")
+    password = System.getProperty("password")
+    serverUrl = System.getProperty("host")
+    applicationId = 'alphasystem-commons'
 }
