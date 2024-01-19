@@ -99,7 +99,10 @@ publishing {
     repositories {
         maven {
             name = "ossrh"
-            url = uri("https://s01.oss.sonatype.org/service/local")
+            def releaseRepositoryUrl = "https://s01.oss.sonatype.org/service/local/"
+            def snapshotRepositoryUrl = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+            def repositoryUrl = version.toString().endsWith("SNAPSHOT") ? snapshotRepositoryUrl : releaseRepositoryUrl
+            url = uri(repositoryUrl)
             credentials(org.gradle.api.credentials.PasswordCredentials)
         }
     }
@@ -124,8 +127,8 @@ publishing {
                     }
                 }
                 scm {
-                    connection = 'scm:git:git://AlphaSystemSolution/commons.git'
-                    developerConnection = 'scm:git@github.com:AlphaSystemSolution/commons.git'
+                    connection = 'scm:git:git://github.com/AlphaSystemSolution/commons.git'
+                    developerConnection = 'scm:git:ssh//github.com:AlphaSystemSolution/commons.git'
                     url = 'https://github.com/AlphaSystemSolution/commons'
                 }
             }
