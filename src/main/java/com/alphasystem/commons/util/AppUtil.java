@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.FileSystemNotFoundException;
@@ -117,32 +118,32 @@ public class AppUtil {
      * Process all resources for given resource.
      *
      * @param resourceName name of system resource, must be a file
-     * @param consumer     A function that takes a path and returns some value R
+     * @param consumer     A function that takes a url and returns some value R
      * @param <R>          Return type of consumer function
      * @return A collection of R
      * @throws SystemException if anything happen during processing
      */
-    public static <R> List<R> processResource(String resourceName, Function<Path, R> consumer) throws SystemException {
+    public static <R> List<R> processResource(String resourceName, Function<URL, R> consumer) throws SystemException {
         LOGGER.debug("Processing resource: {}", resourceName);
-        final var resources = readResources(resourceName);
 
         final var results = new ArrayList<R>();
-        while (resources.hasMoreElements()) {
-            final var url = resources.nextElement();
-            if (Objects.isNull(url)) {
-                LOGGER.warn("Resource not found for: {}", resourceName);
-                throw new SystemException(String.format("Resource not found for: %s.", resourceName));
-            }
-
-            final Path path;
+        final var path = Paths.get(resourceName);
+        if (Files.exists(path)) {
+            // absolute path
             try {
-                path = Paths.get(url.toURI());
-                if (Files.isDirectory(path)) {
-                    throw new SystemException(String.format("Resource \"%s\" is a directory", resourceName));
+                results.add(consumer.apply(path.toUri().toURL()));
+            } catch (MalformedURLException e) {
+                throw new SystemException(e);
+            }
+        } else {
+            final var resources = readResources(resourceName);
+            while (resources.hasMoreElements()) {
+                final var url = resources.nextElement();
+                if (Objects.isNull(url)) {
+                    LOGGER.warn("Resource not found for: {}", resourceName);
+                    throw new SystemException(String.format("Resource not found for: %s.", resourceName));
                 }
-                results.add(consumer.apply(path));
-            } catch (URISyntaxException e) {
-                throw new SystemException(e.getMessage(), e);
+                results.add(consumer.apply(url));
             }
         }
         return results;
