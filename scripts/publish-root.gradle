@@ -5,10 +5,13 @@ ext["ossrhPassword"] = ''
 ext["sonatypeStagingProfileId"] = ''
 
 File secretPropsFile = Paths.get(System.getProperty('user.home'), ".gradle", "sonatype.properties").toFile()
+println secretPropsFile.toString()
 
 Properties p = new Properties()
 new FileInputStream(secretPropsFile).withCloseable { is -> p.load(is) }
 p.each { name, value -> ext[name as String] = value }
+
+println "sonatypeStagingProfileId=${sonatypeStagingProfileId}, ossrhUsername=${ossrhUsername}"
 
 // Set up Sonatype repository
 nexusPublishing {
