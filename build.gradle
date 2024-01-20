@@ -6,8 +6,8 @@ plugins {
     id 'java-library'
     id 'maven-publish'
     id("com.diffplug.spotless") version "6.24.0"
-    id("net.researchgate.release") version "3.0.2"
     id("io.github.gradle-nexus.publish-plugin") version "1.3.0"
+    id("net.researchgate.release") version "3.0.2"
 }
 
 repositories {
@@ -71,9 +71,11 @@ dependencies {
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
 }
 
-group = 'com.alphasystem'
+group = 'io.github.sfali23'
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
+
+apply from: "${rootDir}/scripts/publish-root.gradle"
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
@@ -87,8 +89,6 @@ java {
 test {
     useJUnitPlatform {}
 }
-
-apply from: "${rootDir}/scripts/publish-root.gradle"
 
 publishing {
     publications {
@@ -121,4 +121,4 @@ publishing {
     }
 }
 
-afterReleaseBuild.dependsOn publishToSonatype closeSonatypeStagingRepository
+afterReleaseBuild.dependsOn closeAndReleaseSonatypeStagingRepository
