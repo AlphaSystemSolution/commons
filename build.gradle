@@ -121,4 +121,5 @@ publishing {
     }
 }
 
-afterReleaseBuild.dependsOn closeAndReleaseSonatypeStagingRepository
+// TODO: figure out
+// afterReleaseBuild.dependsOn closeAndReleaseSonatypeStagingRepository
