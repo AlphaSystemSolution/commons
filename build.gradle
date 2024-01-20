@@ -7,7 +7,7 @@ plugins {
     id 'maven-publish'
     id("com.diffplug.spotless") version "6.24.0"
     id("net.researchgate.release") version "3.0.2"
-    id('org.sonatype.gradle.plugins.scan') version '2.6.2'
+    id("io.github.gradle-nexus.publish-plugin") version "1.3.0"
 }
 
 repositories {
@@ -71,7 +71,7 @@ dependencies {
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
 }
 
-group = 'io.github.sfali23'
+group = 'com.alphasystem'
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
 
@@ -88,24 +88,9 @@ test {
     useJUnitPlatform {}
 }
 
-nexusIQScan {
-    username = System.getProperty("username")
-    password = System.getProperty("password")
-    serverUrl = System.getProperty("host")
-    applicationId = 'alphasystem-commons'
-}
+apply from: "${rootDir}/scripts/publish-root.gradle"
 
 publishing {
-    repositories {
-        maven {
-            name = "ossrh"
-            def releaseRepositoryUrl = "https://s01.oss.sonatype.org/service/local/"
-            def snapshotRepositoryUrl = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
-            def repositoryUrl = version.toString().endsWith("SNAPSHOT") ? snapshotRepositoryUrl : releaseRepositoryUrl
-            url = uri(repositoryUrl)
-            credentials(org.gradle.api.credentials.PasswordCredentials)
-        }
-    }
     publications {
         maven(MavenPublication) {
             from(components.java)
@@ -136,4 +121,4 @@ publishing {
     }
 }
 
-afterReleaseBuild.dependsOn publish
+afterReleaseBuild.dependsOn closeAndReleaseSonatypeStagingRepository

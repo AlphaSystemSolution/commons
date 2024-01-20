@@ -5,8 +5,11 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
@@ -69,21 +72,36 @@ public class AppUtilTest {
     @Test
     public void testProcessDirectoryAsFile() {
         try {
-            final var results = AppUtil.processResource(RESOURCE_DIR_NAME, AppUtilTest::readLines);
+            AppUtil.processResource(RESOURCE_DIR_NAME, AppUtilTest::readLines);
             Assertions.fail();
         } catch (SystemException e) {
             final var message = e.getMessage();
             Assertions.assertEquals(String.format("Resource \"%s\" is a directory",RESOURCE_DIR_NAME), message);
+        } catch (RuntimeException e) {
+            Assertions.assertEquals("Is a directory", e.getMessage());
         }
     }
 
     private static FileInfo readLines(Path path) {
         final var pathName = path.toString();
         final var indexOfResource = pathName.indexOf(RESOURCE_DIR_NAME) + RESOURCE_DIR_NAME.length() + 1;
-        final var fileName = pathName.substring(indexOfResource);
+        var fileName = "";
+        if (indexOfResource >= pathName.length()){
+            fileName = path.getFileName().toString();
+        } else {
+            fileName = pathName.substring(indexOfResource);
+        }
         try {
             return new FileInfo(fileName, Files.readAllLines(path));
         } catch (IOException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    private static FileInfo readLines(URL url) {
+        try {
+            return readLines(Paths.get(url.toURI()));
+        } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
     }
