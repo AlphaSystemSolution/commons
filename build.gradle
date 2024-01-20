@@ -121,4 +121,4 @@ publishing {
     }
 }
 
-afterReleaseBuild.dependsOn closeAndReleaseSonatypeStagingRepository
+afterReleaseBuild.dependsOn publishToSonatype
