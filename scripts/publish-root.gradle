@@ -1,0 +1,24 @@
+import java.nio.file.Paths
+
+ext["ossrhUsername"] = ''
+ext["ossrhPassword"] = ''
+ext["sonatypeStagingProfileId"] = ''
+
+File secretPropsFile = Paths.get(System.getProperty('user.home'), ".gradle", "sonatype.properties").toFile()
+
+Properties p = new Properties()
+new FileInputStream(secretPropsFile).withCloseable { is -> p.load(is) }
+p.each { name, value -> ext[name as String] = value }
+
+// Set up Sonatype repository
+nexusPublishing {
+    repositories {
+        sonatype {
+            stagingProfileId = sonatypeStagingProfileId
+            username = ossrhUsername
+            password = ossrhPassword
+            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
+        }
+    }
+}
