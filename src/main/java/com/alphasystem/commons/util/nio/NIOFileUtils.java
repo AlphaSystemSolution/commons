@@ -35,6 +35,16 @@ public final class NIOFileUtils {
     private NIOFileUtils() {
     }
 
+    /**
+     * Copy Given resource to given destination. If given resource is part of jar/zip file this method will extract the
+     * resource from archive.
+     *
+     * @param to Destination path
+     * @param resourceName Name of system resource
+     * @param resourceClass Resource class
+     * @throws IOException if some other I/O error occurs
+     * @throws URISyntaxException if this URL is not formatted strictly according to RFC2396 and cannot be converted to a URI.
+     */
     public static void copyDir(Path to, String resourceName, Class<?> resourceClass) throws IOException, URISyntaxException {
         if (to == null) {
             return;
@@ -52,12 +62,26 @@ public final class NIOFileUtils {
         }
     }
 
+    /**
+     * Copy directory recursively from source to destination.
+     *
+     * @param from Source path
+     * @param to Destination path
+     * @throws IOException if some other I/O error occurs
+     */
     public static void copyDir(Path from, Path to) throws IOException {
         validateDir(from);
         validateTo(to);
         walkFileTree(from, EnumSet.of(FOLLOW_LINKS), MAX_VALUE, new CopyDirVisitor(from, to));
     }
 
+    /**
+     * Copy from source to destination.
+     *
+     * @param src source to read from
+     * @param dest destination to write to
+     * @throws IOException if some other I/O error occurs
+     */
     public static void fastCopy(final ReadableByteChannel src, final WritableByteChannel dest) throws IOException {
         final ByteBuffer buffer = ByteBuffer.allocateDirect(16 * 1024);
 
@@ -74,6 +98,13 @@ public final class NIOFileUtils {
         }
     }
 
+    /**
+     * Copy from source to destination.
+     *
+     * @param src source to read from
+     * @param dest destination to write to
+     * @throws IOException if some other I/O error occurs
+     */
     public static void fastCopy(final InputStream src, final OutputStream dest) throws IOException {
         if (src == null || dest == null) {
             return;

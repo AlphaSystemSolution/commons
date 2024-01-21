@@ -32,13 +32,39 @@ public class AppUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AppUtil.class);
 
+    /**
+     * New line
+     */
     public static final String NEW_LINE = System.lineSeparator();
-    public static final String TAB = "    ";
+
+    /**
+     * File separator
+     */
     public static final String SEPARATOR = File.separator;
+
+    /**
+     * User dir
+     */
     public static final String USER_DIR = getProperty("user.dir", ".");
+
+    /**
+     * User current dir
+     */
     public static final File CURRENT_USER_DIR = new File(USER_DIR);
+
+    /**
+     * User home
+     */
     public static final String USER_HOME = getProperty("user.home", USER_DIR);
+
+    /**
+     * User temp dir
+     */
     public static final File USER_TEMP_DIR = new File(getProperty("java.io.tmpdir", USER_HOME));
+
+    /**
+     * User home dir
+     */
     public static final File USER_HOME_DIR = new File(USER_HOME);
     private static ClassLoader classLoader = null;
 
@@ -46,13 +72,28 @@ public class AppUtil {
         classLoader = Thread.currentThread().getContextClassLoader();
     }
 
+    /**
+     * Initialize object of given class.
+     *
+     * @param fullQualifiedClassName fully qualified class name
+     * @return Initialized object
+     * @throws SystemException wraps other exceptions
+     */
     public static Object initObject(String fullQualifiedClassName) throws SystemException {
         return initObject(fullQualifiedClassName, null, null);
     }
 
-    public static Object initObject(String fullQualifiedClassName,
-                                    Class<?>[] parameterTypes,
-                                    Object[] args) throws SystemException {
+    /**
+     * Initialize object of given class.
+     *
+     * @param fullQualifiedClassName fully qualified class name
+     * @param parameterTypes parameter types of class
+     * @param args arguments
+     * @return Initialized object
+     * @throws SystemException wraps other exceptions
+     */
+    public static Object initObject(String fullQualifiedClassName, Class<?>[] parameterTypes, Object[] args)
+            throws SystemException {
         try {
             return initObject(Class.forName(fullQualifiedClassName), parameterTypes, args);
         } catch (ClassNotFoundException ex) {
@@ -60,6 +101,15 @@ public class AppUtil {
         }
     }
 
+    /**
+     * Initialize object of given class.
+     *
+     * @param clazz class
+     * @param parameterTypes parameter types of class
+     * @param args arguments
+     * @return Initialized object
+     * @throws SystemException wraps other exceptions
+     */
     public static Object initObject(Class<?> clazz, Class<?>[] parameterTypes, Object[] args) throws SystemException {
         try {
             return clazz.getConstructor(parameterTypes).newInstance(args);
@@ -68,6 +118,13 @@ public class AppUtil {
         }
     }
 
+    /**
+     * Invoke no argument (usually get) method on given object.
+     *
+     * @param obj        Given object
+     * @param methodName name of method name
+     * @return Returned object if method exists or null.
+     */
     public static Object invokeMethod(Object obj, String methodName) {
         Object value = null;
         final Method method = getMethod(obj, methodName);
@@ -91,6 +148,12 @@ public class AppUtil {
         return method;
     }
 
+    /**
+     * Input stream of the given resource.
+     *
+     * @param path Given resource path
+     * @return Input stream of the given resource
+     */
     public static InputStream getResourceAsStream(String path) {
         return classLoader.getResourceAsStream(convertPath(path));
     }
@@ -104,6 +167,13 @@ public class AppUtil {
         return path;
     }
 
+    /**
+     * Reads given resource from class path.
+     *
+     * @param resourceName name of resource
+     * @return Enumeration of given resource
+     * @throws SystemException wrap other exception
+     */
     public static Enumeration<URL> readResources(String resourceName) throws SystemException {
         final Enumeration<URL> resources;
         try {
@@ -198,7 +268,7 @@ public class AppUtil {
      *
      * @param dir      directory path
      * @param consumer A function that takes a path and returns some value R
-     * @param <R>      <R> Return type of consumer function
+     * @param <R>      Return type of consumer function
      * @return A collection of R
      * @throws SystemException if anything happen during processing
      */
@@ -215,10 +285,22 @@ public class AppUtil {
         return results;
     }
 
+    /**
+     * Url of the given resource.
+     *
+     * @param path given resource
+     * @return Url of the given resource
+     */
     public static URL getResource(String path) {
         return classLoader.getResource(convertPath(path));
     }
 
+    /**
+     * Stack trace of the exception.
+     *
+     * @param exception Given exception
+     * @return Stack trace of the exception
+     */
     public static String getStackTrace(Throwable exception) {
         final var stackTrace = new StringBuilder();
         if (exception == null) {
@@ -253,6 +335,12 @@ public class AppUtil {
         return result.toString();
     }
 
+    /**
+     * Url of the given resource.
+     *
+     * @param path Given resource path
+     * @return Url of the given resource
+     */
     public static URL getUrl(String path) {
         String resName = path.replace('.', '/');
         int lastIndex = resName.lastIndexOf("/");
@@ -268,6 +356,13 @@ public class AppUtil {
         return url;
     }
 
+    /**
+     * Checks whether given object is same as or super class or interface.
+     *
+     * @param supperClass class
+     * @param object      Given object
+     * @return true or false based on whether object is assignable from given class.
+     */
     public static boolean isInstanceOf(Class<?> supperClass, Object object) {
         return Objects.nonNull(object) && supperClass.isAssignableFrom(object.getClass());
     }

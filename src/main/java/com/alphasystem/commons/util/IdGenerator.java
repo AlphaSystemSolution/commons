@@ -9,10 +9,14 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class IdGenerator {
 
-	private static IdGenerator instance;
+	private static final IdGenerator instance;
+
+	static {
+		instance = new IdGenerator();
+	}
 
 	/** Format an id created by this class as a hex string. */
-	public static String format(int id) {
+	private static String format(int id) {
 		final char[] r = new char[8];
 		for (int p = 7; 0 <= p; p--) {
 			final int h = id & 0xf;
@@ -22,10 +26,12 @@ public class IdGenerator {
 		return new String(r);
 	}
 
-	public synchronized static IdGenerator getInstance() {
-		if (instance == null) {
-			instance = new IdGenerator();
-		}
+	/**
+	 * Returns singleton instance.
+	 *
+	 * @return Singleton instance
+	 */
+	public static IdGenerator getInstance() {
 		return instance;
 	}
 
@@ -47,11 +53,16 @@ public class IdGenerator {
 	static int mix(final int in) {
 		short v0 = hi16(in);
 		short v1 = lo16(in);
-		v0 += ((v1 << 2) + 0 ^ v1) + (salt ^ (v1 >>> 3)) + 1;
-		v1 += ((v0 << 2) + 2 ^ v0) + (salt ^ (v0 >>> 3)) + 3;
+		v0 += (short) (((v1 << 2) ^ v1) + (salt ^ (v1 >>> 3)) + 1);
+		v1 += (short) (((v0 << 2) + 2 ^ v0) + (salt ^ (v0 >>> 3)) + 3);
 		return result(v0, v1);
 	}
 
+	/**
+	 * Generates a random string.
+	 *
+	 * @return Next generated id.
+	 */
 	public static String nextId() {
 		IdGenerator generator = IdGenerator.getInstance();
 		return IdGenerator.format(generator.next()).toUpperCase();
@@ -68,8 +79,8 @@ public class IdGenerator {
 	static int unmix(final int in) {
 		short v0 = hi16(in);
 		short v1 = lo16(in);
-		v1 -= ((v0 << 2) + 2 ^ v0) + (salt ^ (v0 >>> 3)) + 3;
-		v0 -= ((v1 << 2) + 0 ^ v1) + (salt ^ (v1 >>> 3)) + 1;
+		v1 -= (short) (((v0 << 2) + 2 ^ v0) + (salt ^ (v0 >>> 3)) + 3);
+		v0 -= (short) (((v1 << 2) ^ v1) + (salt ^ (v1 >>> 3)) + 1);
 		return result(v0, v1);
 	}
 
@@ -81,7 +92,10 @@ public class IdGenerator {
 		gen = new AtomicInteger(new Random().nextInt());
 	}
 
-	/** Produce the next identifier. */
+	/**
+	 * Produce the next identifier.
+	 * @return Next identifier.
+	 */
 	public int next() {
 		return mix(gen.getAndIncrement());
 	}

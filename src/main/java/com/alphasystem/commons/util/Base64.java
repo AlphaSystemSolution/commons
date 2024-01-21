@@ -62,12 +62,12 @@ package com.alphasystem.commons.util;
  * This class provides encode/decode for RFC 2045 Base64 as defined by RFC 2045,
  * N. Freed and N. Borenstein. RFC 2045: Multipurpose Internet Mail Extensions
  * (MIME) Part One: Format of Internet Message ies. Reference 1996 Available at:
- * http://www.ietf.org/rfc/rfc2045.txt This class is used by XML Schema binary
+ * <a href="http://www.ietf.org/rfc/rfc2045.txt">...</a> This class is used by XML Schema binary
  * format validation
- * 
+ *
  * This implementation does not encode/decode streaming data. You need the data
  * that you will encode/decode already on a byte arrray.
- * 
+ *
  * @author Jeffrey Rodriguez
  * @author Sandy Gao
  * @version $Id: Base64.java,v 1.8 2003/05/08 20:11:55 elena Exp $
@@ -121,9 +121,8 @@ public final class Base64 {
 	/**
 	 * Decodes Base64 data into octects
 	 * 
-	 * @param binaryData
-	 *            Byte array containing Base64 data
-	 * @return Array containind decoded data.
+	 * @param encoded encoded string
+	 * @return Array containing decoded data.
 	 */
 	public static byte[] decode(String encoded) {
 
@@ -356,19 +355,24 @@ public final class Base64 {
 		return new String(encodedData);
 	}
 
-	protected static boolean isBase64(char octect) {
-		return (isWhiteSpace(octect) || isPad(octect) || isData(octect));
+	/**
+	 *
+	 * @param c given char
+	 * @return true is given char is base64
+	 */
+	public static boolean isBase64(char c) {
+		return (isWhiteSpace(c) || isPad(c) || isData(c));
 	}
 
-	protected static boolean isData(char octect) {
+	private static boolean isData(char octect) {
 		return (base64Alphabet[octect] != -1);
 	}
 
-	protected static boolean isPad(char octect) {
+	private static boolean isPad(char octect) {
 		return (octect == PAD);
 	}
 
-	protected static boolean isWhiteSpace(char octect) {
+	private static boolean isWhiteSpace(char octect) {
 		return (octect == 0x20 || octect == 0xd || octect == 0xa || octect == 0x9);
 	}
 
@@ -379,7 +383,7 @@ public final class Base64 {
 	 *            the byte array of base64 data (with WS)
 	 * @return the new length
 	 */
-	protected static int removeWhiteSpace(char[] data) {
+	private static int removeWhiteSpace(char[] data) {
 		if (data == null)
 			return 0;
 

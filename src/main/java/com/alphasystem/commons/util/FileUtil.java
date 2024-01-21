@@ -3,29 +3,25 @@
  */
 package com.alphasystem.commons.util;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PrintWriter;
+import com.alphasystem.commons.SystemException;
+
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 
-import com.alphasystem.commons.ApplicationException;
-import com.alphasystem.commons.SystemException;
-
 /**
  * @author sali
- *
  */
 public class FileUtil {
 
+    /**
+     * Copy from given output stream from input stream.
+     *
+     * @param out Source stream
+     * @param in  Destination stream
+     * @throws IOException if anything goes wrong
+     */
     public static void copyOutputStream(OutputStream out, InputStream in)
             throws IOException {
         // Create a buffer for reading the files
@@ -36,25 +32,14 @@ public class FileUtil {
         }
     }
 
-    public static void deleteFolder(File root) {
-        if (root == null || !root.exists()) {
-            return;
-        }
-        File[] files = root.listFiles();
-        if (files != null) {
-            for (File file : files) {
-                if (file.isDirectory()) {
-                    deleteFolder(file);
-                } else {
-                    file.delete();
-                }
-            }
-        }
-        root.delete();
-    }
-
-    public static void download(String url, File dest)
-            throws ApplicationException {
+    /**
+     * Download file from gievn URL.
+     *
+     * @param url  Given URL
+     * @param dest Destination file
+     * @throws SystemException Wraps other exceptions
+     */
+    public static void download(String url, File dest) throws SystemException {
         try {
             download(new URL(url), dest);
         } catch (MalformedURLException e) {
@@ -62,12 +47,25 @@ public class FileUtil {
         }
     }
 
-    public static void download(String url, String dest)
-            throws ApplicationException {
+    /**
+     * Download file from gievn URL.
+     *
+     * @param url  Given URL
+     * @param dest Destination file
+     * @throws SystemException Wraps other exceptions
+     */
+    public static void download(String url, String dest) throws SystemException {
         download(url, new File(dest));
     }
 
-    public static void download(URL url, File dest) throws ApplicationException {
+    /**
+     * Download file from gievn URL.
+     *
+     * @param url  Given URL
+     * @param dest Destination file
+     * @throws SystemException Wraps other exceptions
+     */
+    public static void download(URL url, File dest) throws SystemException {
         BufferedReader in = null;
         PrintWriter writer = null;
         try {
@@ -94,17 +92,5 @@ public class FileUtil {
                 writer.close();
             }
         }
-    }
-
-    public static void save(String src, File file) {
-        try (PrintWriter writer = new PrintWriter(file)) {
-            writer.println(src);
-        } catch (FileNotFoundException e) {
-            //
-        }
-    }
-
-    public static void save(String src, String file) {
-        save(src, new File(file));
     }
 }
