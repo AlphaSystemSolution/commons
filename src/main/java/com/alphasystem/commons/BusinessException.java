@@ -1,28 +1,40 @@
 package com.alphasystem.commons;
 
+import java.io.Serial;
+
 /**
  * BusinessException wraps all the exception thrown.
  * 
  * @author Syed Farhan Ali
  */
-public class BusinessException extends ApplicationException {
+public class BusinessException extends Exception {
 
+	@Serial
 	private static final long serialVersionUID = 3444175258941101563L;
 
-	public BusinessException(String code) {
-		super(BusinessErrorCode.class, code);
+	/**
+	 *
+	 * @param message Error message
+	 */
+	public BusinessException(String message) {
+		super(message);
 	}
 
-	public BusinessException(String code, String description) {
-		super(BusinessErrorCode.class, code, description);
-	}
-
-	public BusinessException(String code, String description, Throwable cause) {
-		super(BusinessErrorCode.class, code, description, cause);
-	}
-
+	/**
+	 *
+	 * @param message Error message
+	 * @param cause Underlying cause.
+	 */
 	public BusinessException(String message, Throwable cause) {
-		super(BusinessErrorCode.class, "GEN_BUSINESS_ERROR", message, cause);
+		super(message, cause);
+	}
+
+	/**
+	 *
+	 * @param cause Underlying cause.
+	 */
+	public BusinessException(Throwable cause) {
+		this(cause.getMessage(), cause);
 	}
 
 }

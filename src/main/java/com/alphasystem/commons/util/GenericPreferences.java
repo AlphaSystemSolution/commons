@@ -8,29 +8,15 @@ import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.prefs.Preferences;
 
+/**
+ * Base class for Preferences.
+ */
 public abstract class GenericPreferences {
 
     private static final Map<String, GenericPreferences> instances = Collections.synchronizedMap(new HashMap<>());
     private static GenericPreferences instance;
 
     // ~ Instance/static variables .............................................
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param name DOCUMENT ME!
-     * @return DOCUMENT ME!
-     * @throws BusinessException DOCUMENT ME!
-     */
-    @SuppressWarnings("rawtypes")
-    protected static Class getClassForName(String name)
-            throws BusinessException {
-        try {
-            return Class.forName(name);
-        } catch (Exception ex) {
-            throw new BusinessException(ex.getMessage(), ex);
-        }
-    }
 
     /**
      * @return the instance
@@ -52,13 +38,20 @@ public abstract class GenericPreferences {
         return instance;
     }
 
-    public static <P extends GenericPreferences> P getInstance(Class<P> _class) {
-        return getInstance(_class, false);
+    /**
+     * Returns Preferences of type P.
+     *
+     * @param klass Class type
+     * @param <P>   GenericPreferences of type P
+     * @return Preferences of type P
+     */
+    public static <P extends GenericPreferences> P getInstance(Class<P> klass) {
+        return getInstance(klass, false);
     }
 
     @SuppressWarnings({"unchecked"})
-    private static <P extends GenericPreferences> P getInstance(Class<P> _class, boolean recursive) {
-        final String _className = _class.getName();
+    private static <P extends GenericPreferences> P getInstance(Class<P> klass, boolean recursive) {
+        final String _className = klass.getName();
         P instance = (P) instances.get(_className);
         if (instance == null) {
             ServiceLoader<GenericPreferences> serviceLoader = ServiceLoader
@@ -67,7 +60,7 @@ public abstract class GenericPreferences {
             for (GenericPreferences pref : serviceLoader) {
                 boolean prefType = _className.equals(pref.getClass().getName());
                 if (!prefType && recursive) {
-                    prefType = AppUtil.isInstanceOf(_class, pref);
+                    prefType = AppUtil.isInstanceOf(klass, pref);
                 }
                 if (prefType) {
                     instance = (P) pref;
@@ -79,7 +72,7 @@ public abstract class GenericPreferences {
 
         if (instance == null) {
             if (!recursive) {
-                return getInstance(_class, true);
+                return getInstance(klass, true);
             }
             throw new RuntimeException(String.format("Unable to find instance for Class \"%s\".", _className));
         }
@@ -88,35 +81,43 @@ public abstract class GenericPreferences {
 
     // ~ Constructors ..........................................................
 
-    private Preferences root;
+    private final Preferences root;
 
     // ~ Methods ...............................................................
 
     /**
      * Creates a new GenericPreferences object.
      *
-     * @param c DOCUMENT ME!
+     * @param c Initialize Preferences for given class.
      */
     protected GenericPreferences(Class<?> c) {
         root = Preferences.userNodeForPackage(c);
     }
 
     /**
-     * DOCUMENT ME!
+     * Value of the node for the given key or default value if key doesn't exist.
      *
-     * @param nodeName DOCUMENT ME!
-     * @param key      DOCUMENT ME!
-     * @param def      DOCUMENT ME!
-     * @return DOCUMENT ME!
+     * @param nodeName Node name
+     * @param key      Key name
+     * @param def      Default value
+     * @return Value of the node for the given key.
      */
     public String get(String nodeName, String key, String def) {
         Preferences node = root.node(nodeName);
         return node.get(key, def);
     }
 
-    public Preferences getNode(String prefix, String nodeName){
+    /**
+     * Returns Preferences based on given prefix_nodeName.
+     *
+     * @param prefix   Prefix of the node.
+     * @param nodeName Node name
+     * @return Preferences based on given prefix_nodeName.
+     */
+    public Preferences getNode(String prefix, String nodeName) {
         return getNode(String.format("%s_%s", prefix, nodeName));
     }
+
     /**
      * DOCUMENT ME!
      *

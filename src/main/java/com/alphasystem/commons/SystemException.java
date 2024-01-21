@@ -3,33 +3,35 @@
  */
 package com.alphasystem.commons;
 
-import java.io.Serial;
-
 /**
  * @author sali
  * 
  */
-public class SystemException extends ApplicationException {
+public class SystemException extends Exception {
 
-	@Serial
-	private static final long serialVersionUID = 4153167341990093330L;
-
-	public SystemException(String code) {
-		super(SystemErrorCode.class, code);
+	/**
+	 *
+	 * @param message Error message
+	 */
+	public SystemException(String message) {
+		super(message);
 	}
 
-	public SystemException(String code, String description) {
-		super(SystemErrorCode.class, code, description);
-	}
-
-	public SystemException(String code, String description, Throwable cause) {
-		super(SystemErrorCode.class, code, description, cause);
-	}
-
+	/**
+	 * Creates SystemException from message and cause.
+	 *
+	 * @param message Error message
+	 * @param cause Underlying cause
+	 */
 	public SystemException(String message, Throwable cause) {
-		super(SystemErrorCode.class, "GEN_SYSTEM_ERROR", message, cause);
+		super(message, cause);
 	}
 
+	/**
+	 * Creates SystemException from cause.
+	 *
+	 * @param cause Underlying cause
+	 */
 	public SystemException(Throwable cause) {
 		this(cause.getMessage(), cause);
 	}

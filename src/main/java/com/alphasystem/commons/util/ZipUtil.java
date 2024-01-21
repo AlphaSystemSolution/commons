@@ -1,7 +1,5 @@
 package com.alphasystem.commons.util;
 
-import com.alphasystem.commons.ApplicationException;
-import com.alphasystem.commons.BusinessException;
 import com.alphasystem.commons.SystemException;
 
 import java.io.*;
@@ -22,21 +20,26 @@ public class ZipUtil {
 
     private static final String ZIP_DIR_SEPARATOR = "/";
 
-    public static void archiveFile(File fileToArchive, File archiveFile)
-            throws ApplicationException {
+    /**
+     * Archive given file.
+     *
+     * @param fileToArchive file to archive
+     * @param archiveFile   name of the archive file
+     * @throws SystemException wrap other exceptions
+     */
+    public static void archiveFile(File fileToArchive, File archiveFile) throws SystemException {
         archiveFile(new File[]{fileToArchive}, archiveFile);
     }
 
-    private static void archiveFile(File archiveFile, ZipFileEntry... entries)
-            throws ApplicationException {
+    private static void archiveFile(File archiveFile, ZipFileEntry... entries) throws SystemException {
         ZipOutputStream zos = null;
         try {
             zos = new ZipOutputStream(new FileOutputStream(archiveFile));
             for (ZipFileEntry zipFileEntry : entries) {
-                archiveFile(zos, zipFileEntry.getFile(), zipFileEntry.getName());
+                archiveFile(zos, zipFileEntry.file(), zipFileEntry.name());
             }
         } catch (FileNotFoundException e) {
-            throw new BusinessException(e.getMessage(), e);
+            throw new SystemException(e.getMessage(), e);
         } catch (IOException e) {
             throw new SystemException(e.getMessage(), e);
         } finally {
@@ -50,8 +53,14 @@ public class ZipUtil {
         }
     }
 
-    public static void archiveFile(File[] filesToArchive, File archiveFile)
-            throws ApplicationException {
+    /**
+     * Archive given files.
+     *
+     * @param filesToArchive files to archive
+     * @param archiveFile    name of the archive file
+     * @throws SystemException wrap other exceptions
+     */
+    public static void archiveFile(File[] filesToArchive, File archiveFile) throws SystemException {
         ZipFileEntry[] entries = getFilesToArchive(filesToArchive);
         archiveFile(archiveFile, entries);
     }
@@ -73,7 +82,15 @@ public class ZipUtil {
         }
     }
 
-    public static void extractFile(String pathname, String entryName, File outFile) throws ApplicationException {
+    /**
+     * Extract single entry from the zip.
+     *
+     * @param pathname  path name of the archive
+     * @param entryName entry name to extract
+     * @param outFile   output file
+     * @throws SystemException wrap other exceptions
+     */
+    public static void extractFile(String pathname, String entryName, File outFile) throws SystemException {
         ZipFile zipFile = null;
         BufferedOutputStream out = null;
         try {
@@ -101,6 +118,13 @@ public class ZipUtil {
         }
     }
 
+    /**
+     * Extract give path to given out dir.
+     *
+     * @param outDir   output dir
+     * @param pathname path name of the zip file
+     * @return Map of entry name to ZipEntry
+     */
     public static Map<String, ZipEntry> extractZipFile(File outDir, String pathname) {
         final var zipEntries = new HashMap<String, ZipEntry>();
         ZipFile zipFile = null;
