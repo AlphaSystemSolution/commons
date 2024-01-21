@@ -1,5 +1,8 @@
 import java.nio.file.Paths
 
+ext["signingKeyId"] = ''
+ext["signingPassword"] = ''
+ext["signingKey"] = ''
 ext["ossrhUsername"] = ''
 ext["ossrhPassword"] = ''
 ext["sonatypeStagingProfileId"] = ''
@@ -21,4 +24,9 @@ nexusPublishing {
             snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
         }
     }
+}
+
+signing {
+    useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
+    sign publishing.publications
 }
