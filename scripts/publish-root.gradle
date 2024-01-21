@@ -27,6 +27,6 @@ nexusPublishing {
 }
 
 signing {
-    useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
+    useInMemoryPgpKeys(signingKeyId, signingKey as String, signingPassword)
     sign publishing.publications
 }
