@@ -80,6 +80,6 @@ release {
     tagTemplate = "v${version}"
 }
 
-tasks.named("afterReleaseBuild").configure {
-    dependsOn("publishToSonatype --info")
+afterEvaluate {
+    afterReleaseBuild.dependsOn "publishToSonatype --info"
 }
