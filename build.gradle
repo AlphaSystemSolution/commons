@@ -81,5 +81,5 @@ release {
 }
 
 tasks.named("afterReleaseBuild").configure {
-    dependsOn(":publishToSonatype --info")
+    dependsOn("publishToSonatype --info")
 }
