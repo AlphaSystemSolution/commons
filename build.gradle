@@ -77,9 +77,9 @@ publishing {
 }
 
 release {
-    tagTemplate = "v${version}"
+    tagTemplate = 'v${version}'
 }
 
 afterEvaluate {
-    afterReleaseBuild.dependsOn publishToSonatype
+    afterReleaseBuild.dependsOn(publishToSonatype, closeAndReleaseSonatypeStagingRepository)
 }

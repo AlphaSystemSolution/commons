@@ -15,13 +15,34 @@ import java.util.List;
 
 public class AppUtilTest {
 
-    private static final String RESOURCE_DIR_NAME = "files";
+    private static final String META_INF_DIR_NAME = "META-INF";
+    private static final String FILES_DIR_NAME = "files";
+
+    //private static final String RESOURCE_DIR_NAME = "META-INF/files";
     private static final String RESOURCE_NAME = "file1.txt";
 
     @Test
-    public void testProcessDirectory() {
+    public void testProcessTopLevelDirectory() {
+
         try {
-            final var results = AppUtil.processResourceDirectory(RESOURCE_DIR_NAME, AppUtilTest::readLines);
+            final var results = AppUtil.processResourceDirectory(FILES_DIR_NAME, path -> readLines(path, FILES_DIR_NAME));
+            final var fileNames = results.stream().map(fileInfo -> fileInfo.name).toList();
+            final var expectedFileNames = Arrays.asList("file1.txt", "file2.txt", "sub-dir/file1.txt");
+            Assertions.assertIterableEquals(expectedFileNames, fileNames);
+
+            final var actualLines = results.stream().map(fileInfo -> fileInfo.lines).flatMap(List::stream).toList();
+            final var expectedLines = Arrays.asList("File1 Line1", "File1 Line2", "File2 Line1", "File2 Line2", "File3 Line1", "File3 Line2");
+            Assertions.assertIterableEquals(expectedLines, actualLines);
+        } catch (Exception e) {
+            Assertions.fail(e);
+        }
+    }
+
+    @Test
+    public void testProcessSubDirectory() {
+        try {
+            final var dirName = String.format("%s/%s", META_INF_DIR_NAME, FILES_DIR_NAME);
+            final var results = AppUtil.processResourceDirectory(dirName, path -> readLines(path, dirName));
 
             final var fileNames = results.stream().map(fileInfo -> fileInfo.name).toList();
             final var expectedFileNames = Arrays.asList("file1.txt", "file2.txt", "sub-dir/file1.txt");
@@ -38,7 +59,7 @@ public class AppUtilTest {
     @Test
     public void testProcessNonExistingDirectory() {
         try {
-            final var results = AppUtil.processResourceDirectory("does-not-exists", AppUtilTest::readLines);
+            final var results = AppUtil.processResourceDirectory("does-not-exists", path -> readLines(path, "does-not-exists"));
             Assertions.assertTrue(results.isEmpty());
         } catch (SystemException e) {
             Assertions.fail(e);
@@ -46,9 +67,10 @@ public class AppUtilTest {
     }
 
     @Test
-    public void testProcessFileAsDirectory() {
+    public void testProcessFileAsDirectoryFromTopLevel() {
         try {
-            final var results = AppUtil.processResourceDirectory(String.format("%s.%s", RESOURCE_DIR_NAME, RESOURCE_NAME), AppUtilTest::readLines);
+            final var resourceName = String.format("%s.%s", FILES_DIR_NAME, RESOURCE_NAME);
+            final var results = AppUtil.processResourceDirectory(resourceName, path -> readLines(path, FILES_DIR_NAME));
             Assertions.assertTrue(results.isEmpty());
         } catch (SystemException e) {
             final var message = e.getMessage();
@@ -57,9 +79,38 @@ public class AppUtilTest {
     }
 
     @Test
-    public void testProcessResource() {
+    public void testProcessFileAsDirectoryFromSubDirectory() {
         try {
-            final var results = AppUtil.processResource(String.format("%s.%s", RESOURCE_DIR_NAME, RESOURCE_NAME), AppUtilTest::readLines);
+            final var parentName = String.format("%s/%s", META_INF_DIR_NAME, FILES_DIR_NAME);
+            final var resourceName = String.format("%s/%s", parentName, RESOURCE_NAME);
+            final var results = AppUtil.processResourceDirectory(resourceName, path -> readLines(path, parentName));
+            Assertions.assertTrue(results.isEmpty());
+        } catch (SystemException e) {
+            final var message = e.getMessage();
+            Assertions.assertEquals(String.format("Path \"%s\" is not a directory", RESOURCE_NAME), message);
+        }
+    }
+
+    @Test
+    public void testProcessResourceFromTopLevel() {
+        try {
+            final var resourceName = String.format("%s/%s", FILES_DIR_NAME, RESOURCE_NAME);
+            final var results = AppUtil.processResource(resourceName, url -> readLines(url, FILES_DIR_NAME));
+            Assertions.assertEquals(1, results.size());
+            final var fileInfo = results.get(0);
+            final var expected = new FileInfo(RESOURCE_NAME, Arrays.asList("File1 Line1", "File1 Line2"));
+            Assertions.assertEquals(expected, fileInfo);
+        } catch (SystemException e) {
+            Assertions.fail(e);
+        }
+    }
+
+    @Test
+    public void testProcessResourceFromSubDirectory() {
+        try {
+            final var parentName = String.format("%s/%s", META_INF_DIR_NAME, FILES_DIR_NAME);
+            final var resourceName = String.format("%s/%s", parentName, RESOURCE_NAME);
+            final var results = AppUtil.processResource(resourceName, url -> readLines(url, parentName));
             Assertions.assertEquals(1, results.size());
             final var fileInfo = results.get(0);
             final var expected = new FileInfo(RESOURCE_NAME, Arrays.asList("File1 Line1", "File1 Line2"));
@@ -72,21 +123,35 @@ public class AppUtilTest {
     @Test
     public void testProcessDirectoryAsFile() {
         try {
-            AppUtil.processResource(RESOURCE_DIR_NAME, AppUtilTest::readLines);
+            AppUtil.processResource(FILES_DIR_NAME, url -> readLines(url, FILES_DIR_NAME));
             Assertions.fail();
         } catch (SystemException e) {
             final var message = e.getMessage();
-            Assertions.assertEquals(String.format("Resource \"%s\" is a directory",RESOURCE_DIR_NAME), message);
+            Assertions.assertEquals(String.format("Resource \"%s\" is a directory", FILES_DIR_NAME), message);
         } catch (RuntimeException e) {
             Assertions.assertEquals("Is a directory", e.getMessage());
         }
     }
 
-    private static FileInfo readLines(Path path) {
+    @Test
+    public void testProcessSubDirectoryAsFile() {
+        final var resourceName = String.format("%s/%s", META_INF_DIR_NAME, FILES_DIR_NAME);
+        try {
+            final var fileInfos = AppUtil.processResource(resourceName, url -> readLines(url, resourceName));
+            Assertions.assertTrue(fileInfos.isEmpty());
+        } catch (SystemException e) {
+            final var message = e.getMessage();
+            Assertions.assertEquals(String.format("Resource \"%s\" is a directory", resourceName), message);
+        } catch (RuntimeException e) {
+            Assertions.assertEquals("Is a directory", e.getMessage());
+        }
+    }
+
+    private static FileInfo readLines(Path path, String parentName) {
         final var pathName = path.toString();
-        final var indexOfResource = pathName.indexOf(RESOURCE_DIR_NAME) + RESOURCE_DIR_NAME.length() + 1;
+        final var indexOfResource = pathName.indexOf(parentName) + parentName.length() + 1;
         var fileName = "";
-        if (indexOfResource >= pathName.length()){
+        if (indexOfResource >= pathName.length()) {
             fileName = path.getFileName().toString();
         } else {
             fileName = pathName.substring(indexOfResource);
@@ -98,13 +163,14 @@ public class AppUtilTest {
         }
     }
 
-    private static FileInfo readLines(URL url) {
+    private static FileInfo readLines(URL url, String parentName) {
         try {
-            return readLines(Paths.get(url.toURI()));
+            return readLines(Paths.get(url.toURI()), parentName);
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private record FileInfo(String name, List<String> lines) {}
+    private record FileInfo(String name, List<String> lines) {
+    }
 }
