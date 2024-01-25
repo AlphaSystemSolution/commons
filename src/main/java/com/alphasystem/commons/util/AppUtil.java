@@ -87,8 +87,8 @@ public class AppUtil {
      * Initialize object of given class.
      *
      * @param fullQualifiedClassName fully qualified class name
-     * @param parameterTypes parameter types of class
-     * @param args arguments
+     * @param parameterTypes         parameter types of class
+     * @param args                   arguments
      * @return Initialized object
      * @throws SystemException wraps other exceptions
      */
@@ -104,9 +104,9 @@ public class AppUtil {
     /**
      * Initialize object of given class.
      *
-     * @param clazz class
+     * @param clazz          class
      * @param parameterTypes parameter types of class
-     * @param args arguments
+     * @param args           arguments
      * @return Initialized object
      * @throws SystemException wraps other exceptions
      */
@@ -231,8 +231,12 @@ public class AppUtil {
      */
     public static <R> List<R> processResourceDirectory(String resourceName, Function<Path, R> consumer) throws SystemException {
         LOGGER.debug("Processing resource directory: {}", resourceName);
-        final var resources = readResources(resourceName);
-
+        final Enumeration<URL> resources;
+        try {
+            resources = classLoader.getResources(resourceName);
+        } catch (IOException ex) {
+            throw new SystemException("Could not load resource", ex);
+        }
         final var results = new ArrayList<R>();
         while (resources.hasMoreElements()) {
             final var url = resources.nextElement();
@@ -241,7 +245,7 @@ public class AppUtil {
                 throw new SystemException(String.format("Resource not found for: %s.", resourceName));
             }
 
-            LOGGER.debug("Resource URL: {}", url);
+            LOGGER.info("Resource URL: {}", url);
             Path path;
             try {
                 path = Paths.get(url.toURI());
